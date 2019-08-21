@@ -33,12 +33,14 @@ defmodule Broadway.Consumer do
   @impl true
   def handle_events(events, _from, state) do
     [{messages, batch_info}] = events
+    Broadway.Metrics.dispatch_running_event(messages, self())
     %Broadway.BatchInfo{batcher: batcher} = batch_info
 
     {successful_messages, failed_messages} = handle_batch(batcher, messages, batch_info, state)
 
     try do
       Acknowledger.ack_messages(successful_messages, failed_messages)
+      Broadway.Metrics.dispatch_ack_event(successful_messages, failed_messages, :batcher_consumer)
     catch
       kind, reason ->
         Logger.error(Exception.format(kind, reason, System.stacktrace()))

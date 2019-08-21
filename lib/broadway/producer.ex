@@ -129,6 +129,7 @@ defmodule Broadway.Producer do
   end
 
   defp transform_events(events, nil) do
+    Broadway.Metrics.dispatch_running_event(events, self())
     case events do
       [] -> :ok
       [message | _] -> validate_message(message)
@@ -138,6 +139,7 @@ defmodule Broadway.Producer do
   end
 
   defp transform_events(events, {m, f, opts}) do
+    Broadway.Metrics.dispatch_running_event(events, self())
     for event <- events do
       message = apply(m, f, [event, opts])
       validate_message(message)

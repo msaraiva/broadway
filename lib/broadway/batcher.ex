@@ -32,6 +32,7 @@ defmodule Broadway.Batcher do
 
   @impl true
   def handle_events(events, _from, state) do
+    Broadway.Metrics.dispatch_running_event(events, self())
     batches = handle_events_per_batch_key(events, [], state)
     {:noreply, batches, state}
   end

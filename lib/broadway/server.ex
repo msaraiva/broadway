@@ -20,8 +20,13 @@ defmodule Broadway.Server do
        supervisor_pid: supervisor_pid,
        terminator: config.terminator,
        name: opts[:name],
-       producers_names: producers_names(name_prefix(opts[:name]), config.producers_config)
+       producers_names: producers_names(name_prefix(opts[:name]), config.producers_config),
+       config: config
      }}
+  end
+
+  def get_config(server) do
+    GenServer.call(server, :get_config)
   end
 
   @impl true
@@ -31,6 +36,12 @@ defmodule Broadway.Server do
 
   def handle_info(_, state) do
     {:noreply, state}
+  end
+
+  @impl true
+  def handle_call(:get_config, _from, state) do
+    %{config: config} = state
+    {:reply, config, state}
   end
 
   @impl true
